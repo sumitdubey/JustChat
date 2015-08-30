@@ -15,6 +15,6 @@ io.on('connection', function(socket){
   });
 });
 
-http.listen(server_port, function(){
+http.listen(server_port, server_ip_address, function(){
   console.log('listening on *:8080');
 });
