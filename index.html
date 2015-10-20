@@ -23,11 +23,12 @@
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
+    var socket = io();
     var userName = prompt("Enter your name: ","User Name");
     //$('#userList').append("<button>"+userName+"</button>")
     socket.emit('new user', userName);
     $('#m').attr("placeholder",$('#m').attr("placeholder")+userName);
-      var socket = io();
+     
       $('form').submit(function(){
       	var payload = {"userName":userName, "data":$('#m').val()};
         socket.emit('chat message', payload);
