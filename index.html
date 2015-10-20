@@ -14,23 +14,38 @@
     </style>
   </head>
   <body>
-	<h1>Welcome to an open chat platform....Just Chat</h1>
+    <h1>Welcome to an open chat platform....Just Chat</h1>
+    <div id="userList"></div>	
     <ul id="messages"></ul>
     <form action="">
-      <input id="m" autocomplete="off" placeholder="Enter Your Msg...sumit" /><button>Send</button>
+      <input id="m" autocomplete="off" placeholder="Enter Your Msg..." /><button>Send</button>
     </form>
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
     var userName = prompt("Enter your name: ","User Name");
+    //$('#userList').append("<button>"+userName+"</button>")
+    socket.emit('new user', userName);
+    $('#m').attr("placeholder",$('#m').attr("placeholder")+userName);
       var socket = io();
       $('form').submit(function(){
-        socket.emit('chat message', userName + ': ' +$('#m').val());
+      	var payload = {"userName":userName, "data":$('#m').val()};
+        socket.emit('chat message', payload);
         $('#m').val('');
         return false;
       });
-      socket.on('chat message', function(msg){
-        $('#messages').append($('<li>').text(msg));
+      socket.on('chat message', function(payload){
+      	console.log("payload:",payload)
+      	//payload = JSON.parse(payload)
+        $('#messages').append($('<li>').text(payload));
+      });
+      
+      socket.on('user list', function(userList){
+      	console.log("userlist:",userList)
+      	//payload = JSON.parse(payload)
+      	userList.forEach(function(user){
+            $('#userList').append("<button>"+userName+"</button>");
+      	});
       });
     </script>
   </body>
