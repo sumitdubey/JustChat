@@ -12,12 +12,17 @@ app.get('/', function(req, res){
 io.on('connection', function(socket){
   socket.on('new user', function(userName){
     userList.push(userName);
+	console.log("new user: ",userName);
+	console.log("total users: ",userList);
     io.emit('user list', userList);
   });
   
   socket.on('chat message', function(payload){
-    //payload = JSON.parse(payload);
+    console.log("chat message: ",payload)
     io.emit('chat message', payload);
+  });
+  socket.on('disconnect', function(data){
+	  console.log("user disconnected: ",data)
   });
 });
 
