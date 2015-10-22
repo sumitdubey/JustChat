@@ -3,13 +3,18 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
-var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '10.120.57.18'
+var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1' 
+
+var sockets = [];
 var userList = [];
+var count = 0;
+
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
 
 io.on('connection', function(socket){
+   sockets.push(socket);
   socket.on('new user', function(userName){
     userList.push(userName);
 	console.log("new user: ",userName);
@@ -19,10 +24,15 @@ io.on('connection', function(socket){
   
   socket.on('chat message', function(payload){
     console.log("chat message: ",payload)
+	payload["count"] = ++count;
     io.emit('chat message', payload);
   });
-  socket.on('disconnect', function(data){
-	  console.log("user disconnected: ",data)
+  socket.on('disconnect', function(){
+	  var index = sockets.indexOf(socket);
+	  sockets.splice(index, 1);
+	  console.log("user disconnected: ",userList[index])
+	  userList.splice(index, 1);
+	  io.emit('user list', userList);
   });
 });
 
