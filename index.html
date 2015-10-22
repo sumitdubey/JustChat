@@ -38,7 +38,7 @@
     var userName = prompt("Enter your name: ","User Name");
     //$('#userList').append("<button>"+userName+"</button>")
     socket.emit('new user', userName);
-    $('#m').attr("placeholder",$('#m').attr("placeholder")+userName);
+    $('#m').attr("placeholder",$('#m').attr("placeholder")+userName+ '\t\t\t\t\t\t\t\t\t\t\t\t © by sumit dubey');
      
       $('form').submit(function(){
       	var payload = {"userName":userName, "data":$('#m').val()};
