@@ -1,6 +1,7 @@
-var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var express = require("express");
+var app = express();
+var server = require('http').createServer(app);
+var io = require('socket.io')(server);
 
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
 var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1' 
@@ -9,12 +10,14 @@ var sockets = [];
 var userList = [];
 var count = 0;
 
+app.use(express.static(__dirname))
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
 
 io.on('connection', function(socket){
    sockets.push(socket);
+   
   socket.on('new user', function(userName){
     userList.push(userName);
 	console.log("new user: ",userName);
@@ -36,6 +39,6 @@ io.on('connection', function(socket){
   });
 });
 
-http.listen(server_port, server_ip_address, function(){
+server.listen(server_port, server_ip_address, function(){
   console.log('listening on *:8080');
 });
