@@ -1,15 +1,17 @@
 <!doctype html>
 <html>
   <head>
+  <link rel="shortcut icon" type="image/jpg" href="favicon.ico" />
+
     <title>Just Chat SMT</title>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font: 15px Helvetica, Arial; }
 	  #container{ height:99vh; bottom:0;}
 	  #header { background: rgb(130, 224, 255); border: 2px solid ;}
-      form { background: #000; padding: 3px; position:fix;  bottom: 0px; width: 100%; }
-      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
-      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      .form { background: #000; padding: 3px; position:fix;  bottom: 0px; width: 100%; }
+      .form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      .form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
 	  
 	  #online { background: white; border:2px solid rgb(106, 243, 104); border-radius:45px ; padding: 5px; }
 	  
@@ -20,6 +22,7 @@
 	  #messages li:nth-child(4n+0) { background: #eee; }
 	  #messages li:nth-child(4n+1) { background: #eee; }
 	  #messages li .text { position:relative; top:-15px; padding:5px; }
+	  #messages li .timeStamp { float:right;}
 	  //img { line-height:62px;}
     </style>
   </head>
@@ -31,35 +34,44 @@
 		</div>
 		
 		<ul id="messages"></ul>
-		<form action="">
-			<input id="m" autocomplete="off" placeholder="Enter Your Msg..." /><button>Send</button>
-		</form>
+		<div class="form">
+			<input id="m" autocomplete="off" placeholder="Enter Your Msg..." />
+			<button id="msgSend">Send</button>
+		</div>
 	</div>
 		
     
 	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
+	var isFocus = true;
     var socket = io();
     var userName = prompt("Enter your name: ","User Name");
     //$('#userList').append("<button>"+userName+"</button>")
     socket.emit('new user', userName);
     $('#m').attr("placeholder",$('#m').attr("placeholder")+userName+ '\t\t\t\t\t\t\t\t\t\t\t\t © by sumit dubey');
      
-      $('form').submit(function(){
+      $('#msgSend').click(function(){
 		var msg = $('#m').val();
-		if(!msg) return;
-      	var payload = {"userName":userName, "data":msg};
-        socket.emit('chat message', payload);
-        $('#m').val('');
-        return false;
+		if(msg.trim()){
+			var payload = {"userName":userName, "data":msg};
+			socket.emit('chat message', payload);
+			$('#m').val('');
+		}
+        
       });
       socket.on('chat message', function(payload){
       	console.log("payload:",payload)
       	//payload = JSON.parse(payload)
-        $('#messages').append($('<li id="'+ payload.count +'" class="user"><img src="user.jpg"><span class="text">'+payload.userName+'</span></li><li><span class="text">'+ payload.data+'</span></li>'));
+        $('#messages').append($('<li id="'+ payload.count +'" class="user"><img src="user.jpg"><span class="text">'+payload.userName+'</span></li><li><span class="text">'+ payload.data+'</span><span class="timeStamp">'+ (new Date()).toLocaleTimeString()+'</span></li>'));
 		location.href = "#";
 		location.href = "#"+payload.count;
+		if(!isFocus){
+		console.log("infocus: ",isFocus)
+			notifyMe(payload.userName, {'body':payload.data, 'icon':'user.jpg'})
+		}
+		console.log(new Date())
+		
       });
       
       socket.on('user list', function(userList){
@@ -75,6 +87,42 @@
 			socket.emit('disconnect', userName);
 			console.log("unloading : "+ userName)
 		}
+	function notifyMe(title, options) {
+		// Let's check if the browser supports notifications
+		if (!("Notification" in window)) {
+			alert("This browser does not support desktop notification");
+		}
+
+		// Let's check whether notification permissions have already been granted
+		else if (Notification.permission === "granted") {
+			// If it's okay let's create a notification
+			var notification = new Notification(title, options);
+			notification.onclick = function(){
+				window.focus();
+			}
+		}
+
+		// Otherwise, we need to ask the user for permission
+		else if (Notification.permission !== 'denied') {
+			Notification.requestPermission(function (permission) {
+				// If the user accepts, let's create a notification
+				/*if (permission === "granted") {
+					var notification = new Notification(title, options);
+				}*/
+			});
+		}
+
+	// At last, if the user has denied notifications, and you 
+	// want to be respectful there is no need to bother them any more.
+	}
+	
+	window.onfocus = function(){
+		isFocus = true;
+	}
+	window.onblur = function(){
+		isFocus = false;
+	}
+	
     </script>
   </body>
 </html>

@@ -34,6 +34,7 @@ io.on('connection', function(socket){
 	  var index = sockets.indexOf(socket);
 	  sockets.splice(index, 1);
 	  console.log("user disconnected: ",userList[index])
+	  console.log("index: ",index)
 	  userList.splice(index, 1);
 	  io.emit('user list', userList);
   });
